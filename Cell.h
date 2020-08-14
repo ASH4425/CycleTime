@@ -111,9 +111,11 @@ public:
 	double driftCoeffDependsigmaCtoC;
 
 	/*WaitTime estimation*/
-	std::chrono::duration<double> waitTime;
-	std::chrono::system_clock::time_point latestWriteTime;
-	std::chrono::system_clock::time_point readTime;
+	int cycleCount; //dynamic variable
+	double waitTime; //dynamic variable
+	double cycleTime = 0.1;
+	
+
 
 	bool batchSizeZero;
 };
