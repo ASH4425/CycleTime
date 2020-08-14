@@ -404,15 +404,6 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
 									//if (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff < static_cast<AnalogNVM*>(arrayIH->cell[j][k])->mindriftCoeff) static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->mindriftCoeff;
 									//if (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff > static_cast<AnalogNVM*>(arrayIH->cell[j][k])->maxdriftCoeff) static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->maxdriftCoeff;
 
-									static_cast<AnalogNVM*>(arrayHO->cell[j][k])->conductance *= pow((timeZero / (waitTimeinNano * 1e+09)), 0.031);
-
-									if ((static_cast<AnalogNVM*>(arrayHO->cell[j][k])->conductance) < (static_cast<RealDevice*>(arrayHO->cell[j][k])->minConductance)) {
-										static_cast<AnalogNVM*>(arrayHO->cell[j][k])->conductance = static_cast<RealDevice*>(arrayHO->cell[j][k])->minConductance;
-									}
-
-									if ((static_cast<AnalogNVM*>(arrayHO->cell[j][k])->conductance) > (static_cast<RealDevice*>(arrayHO->cell[j][k])->maxConductance)) {
-										static_cast<AnalogNVM*>(arrayHO->cell[j][k])->conductance = static_cast<RealDevice*>(arrayHO->cell[j][k])->maxConductance;
-									}
 									
 									Isum += arrayHO->ReadCell(j, k);
 
@@ -977,7 +968,7 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
 							if (AnalogNVM* temp = dynamic_cast<AnalogNVM*>(arrayHO->cell[jj][k])) { // Analog eNVM
 								arrayHO->WriteCell(jj, k, deltaWeight2[jj][k], weight2[jj][k], param->maxWeight, param->minWeight, true);
 
-									/*latestWriteTime estimation*/
+								/*latestWriteTime estimation*/
 								if (!(deltaWeight2[jj][k] == 0)) {
 									static_cast<AnalogNVM*>(arrayHO->cell[jj][k])->cycleCount = 1;
 								}
@@ -985,16 +976,12 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
 									static_cast<AnalogNVM*>(arrayHO->cell[jj][k])->cycleCount += 1;
 								}
 
-										/*
-										std::cout << jj << " " << k << " " << std::endl;
-										std::cout << deltaWeight2[jj][k] << " " << (static_cast<AnalogNVM*>(arrayHO->cell[jj][k])->waitTime).count() << std::endl;
-										std::cout << " " << std::endl;
-										*/
-									}
-
-
-
-
+								/*
+								std::cout << jj << " " << k << " " << std::endl;
+								std::cout << deltaWeight2[jj][k] << " " << (static_cast<AnalogNVM*>(arrayHO->cell[jj][k])->waitTime).count() << std::endl;
+								std::cout << " " << std::endl;
+								*/
+							
 								weight2[jj][k] = arrayHO->ConductanceToWeight(jj, k, param->maxWeight, param->minWeight);
 								weightChangeBatch = weightChangeBatch || static_cast<AnalogNVM*>(arrayHO->cell[jj][k])->numPulse;
 								if (fabs(static_cast<AnalogNVM*>(arrayIH->cell[jj][k])->numPulse) > maxPulseNum)
