@@ -129,6 +129,8 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
 				if (batchSize == numTrain - 1) finalbatch = true;
 				else finalbatch = false;
 
+				bool batchSizeZero;
+				if (param->currentEpoch > 1 || batchSize > 0) batchSizeZero = false;
 
 			int i = rand() % param->numMnistTrainImages;  // Randomize sample
 			//int i = 1;       // use this value for debug
@@ -182,23 +184,26 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
 									
 
 									/*arrayIH readTime estimation*/
+									if (batchSizeZero == false) {
+
+										double timeZero = 1e-06;
+
+										static_cast<AnalogNVM*>(arrayIH->cell[j][k])->waitTime = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->cycleCount * static_cast<AnalogNVM*>(arrayIH->cell[j][k])->cycleTime;
+
+										//if (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff < static_cast<AnalogNVM*>(arrayIH->cell[j][k])->mindriftCoeff) static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->mindriftCoeff;
+										//if (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff > static_cast<AnalogNVM*>(arrayIH->cell[j][k])->maxdriftCoeff) static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->maxdriftCoeff;
+
+										static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance *= pow((timeZero / (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->waitTime)), 0.031);
+
+										if ((static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance) < (static_cast<RealDevice*>(arrayIH->cell[j][k])->minConductance)) {
+											static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance = static_cast<RealDevice*>(arrayIH->cell[j][k])->minConductance;
+										}
+
+										if ((static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance) > (static_cast<RealDevice*>(arrayIH->cell[j][k])->maxConductance)) {
+											static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance = static_cast<RealDevice*>(arrayIH->cell[j][k])->maxConductance;
+										}
+									}
 									
-									double timeZero = 1e-06;
-
-									static_cast<AnalogNVM*>(arrayIH->cell[j][k])->waitTime = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->cycleCount * static_cast<AnalogNVM*>(arrayIH->cell[j][k])->cycleTime;
-
-									//if (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff < static_cast<AnalogNVM*>(arrayIH->cell[j][k])->mindriftCoeff) static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->mindriftCoeff;
-									//if (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff > static_cast<AnalogNVM*>(arrayIH->cell[j][k])->maxdriftCoeff) static_cast<AnalogNVM*>(arrayIH->cell[j][k])->driftCoeff = static_cast<AnalogNVM*>(arrayIH->cell[j][k])->maxdriftCoeff;
-
-									static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance *= pow((timeZero / (static_cast<AnalogNVM*>(arrayIH->cell[j][k])->waitTime)), 0.031);
-
-									if ((static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance) < (static_cast<RealDevice*>(arrayIH->cell[j][k])->minConductance)) {
-										static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance = static_cast<RealDevice*>(arrayIH->cell[j][k])->minConductance;
-									}
-
-									if ((static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance) > (static_cast<RealDevice*>(arrayIH->cell[j][k])->maxConductance)) {
-										static_cast<AnalogNVM*>(arrayIH->cell[j][k])->conductance = static_cast<RealDevice*>(arrayIH->cell[j][k])->maxConductance;
-									}
 
 									Isum += arrayIH->ReadCell(j, k);//ReadCell(j, k) : return cellCurrent
 									inputSum += arrayIH->GetMediumCellReadCurrent(j, k);    // get current of Dummy Column as reference
@@ -365,7 +370,7 @@ double s2[param->nOutput];  // Output delta from hidden layer to the output laye
 									
 
 									/*arrayHO readTime estimation*/
-									if (param->currentEpoch > 1 || batchSize > 0) {
+									if (batchSizeZero == false) {
 
 										double timeZero = 1e-06;
 
